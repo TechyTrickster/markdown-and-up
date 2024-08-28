@@ -1,0 +1,20 @@
+[
+    {
+        "name": "CodeHilite",
+        "description": "a syntax extension to include boxes for snippets of source code with language specific syntax highlighting",
+        "example input": "b'YGBgcHl0aG9uCnByaW50ICJoZWxsbyB3b3JsZCIKYGBgCg=='",
+        "example output": "",
+        "default state": false,
+        "pip install": "",
+        "internal name": ""
+    },
+    {
+        "name": "mark",
+        "description": "a syntax extension to highlight sections of text between double equal signs",
+        "example": "==hello world==",
+        "example output": "",
+        "default state": false,
+        "pip install": "",
+        "internal name": ""
+    }
+]

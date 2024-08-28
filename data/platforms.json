@@ -1,0 +1,22 @@
+[
+    {
+        "platform name": "Github",
+        "description": "an online git system to host your code",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Discord",
+        "description": "a popular instant messaging and social app",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "CommonMark",
+        "description": "the closest we all have to a standard for markdown.  its a subset of most other implementations",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Stack Exchange",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    }
+]

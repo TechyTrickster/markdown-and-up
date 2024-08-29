@@ -27,46 +27,18 @@ class MainWindow(Gtk.ApplicationWindow):
         self.variable = False        
         self.backend = MarkdownPreview(features, pretties, platforms)
         self.header = Gtk.HeaderBar()
-        self.set_titlebar(self.header)
-        self.editingWindow = Gtk.TextView()
-        self.previewWindow = Gtk.TextView()
-        self.leftScrollWrapper = Gtk.ScrolledWindow()
-        self.rightScrollWrapper = Gtk.ScrolledWindow()
-        self.leftPaneFrame = Gtk.Frame()
-        self.rightPaneFrame = Gtk.Frame()
+        self.set_titlebar(self.header)        
         self.notebookBlock = Gtk.Notebook()
         self.eventKeys = Gtk.EventControllerKey()
         self.add_controller(self.eventKeys)
         self.eventKeys.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.pages = []
 
-        #self.webView = WebKit.WebView()
-        self.core = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, homogeneous = True)
+        #self.webView = WebKit.WebView()        
         self.sideBar = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
-        self.leftPane = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, homogeneous = True)
-        self.rightPane = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, homogeneous = True)
-
-        self.leftScrollWrapper.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        self.rightScrollWrapper.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        self.leftPaneFrame.set_margin_start(3)
-        self.leftPaneFrame.set_margin_end(3)
-        self.leftPaneFrame.set_margin_top(2)
-        self.leftPaneFrame.set_margin_bottom(2)
-        self.rightPaneFrame.set_margin_start(3)
-        self.rightPaneFrame.set_margin_end(3)
-        self.rightPaneFrame.set_margin_top(2)
-        self.rightPaneFrame.set_margin_bottom(2)
-
 
         self.set_child(self.notebookBlock)
-        self.set_child(self.core)
-        self.core.append(self.leftPane)        
-        self.core.append(self.rightPane)        
-        self.leftPane.append(self.leftPaneFrame)
-        self.rightPane.append(self.rightPaneFrame)
-        self.leftPaneFrame.set_child(self.leftScrollWrapper)
-        self.leftScrollWrapper.set_child(self.editingWindow)
-        self.rightPaneFrame.set_child(self.rightScrollWrapper)
-        self.rightScrollWrapper.set_child(self.previewWindow)
+
         
 
         menuElements = [
@@ -97,29 +69,31 @@ class MainWindow(Gtk.ApplicationWindow):
             }
         ]
 
-        MainWindow.createDropDownMenu(menuElements, self.header, self)        
-        textBuffer = Gtk.TextBuffer()
-        message = "hello world!  my name is paul!"
-        textBuffer.set_text(message, len(message))
-        self.editingWindow.set_buffer(textBuffer)
-        self.editingWindow.set_visible(True)
-
+        MainWindow.createDropDownMenu(menuElements, self.header, self)
+        self.insertNewPage("", "new")
+        self.changePage(0, [])
         self.eventKeys.connect("key-released", self.updateOutput, )
+        self.notebookBlock.connect("change_current-page", self.changePage)
 
 
+    def changePage(self, pageNumber: int, data):        
+        self.notebookBlock.set_current_page(pageNumber)
+        self.updateOutput()
 
     
-    def updateOutput(self, keyval, keycode, state, userData):
-        print(keyval, keycode, state, userData)
-        #need to configure slow updates to not bog down the host when typing quickly, refresh once a second to every half second        
-        buffer = self.editingWindow.get_buffer()
-        text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-        print(text)
+    def updateOutput(self, keyval = "", keycode = 0, state = [], userData = []):
+        print("update")        
+        print()
+        print(self.pages[self.notebookBlock.get_current_page()])
+        print()
+        print()
+        print()
+        print()
+        (editingBuffer, previewBuffer) = self.pages[self.notebookBlock.get_current_page()]        
+        text = editingBuffer.get_text(editingBuffer.get_start_iter(), editingBuffer.get_end_iter(), True)        
         self.backend.loadData(text)
-        newText = self.backend.getPreview()
-        print(newText)
-        outputBuffer = self.previewWindow.get_buffer()
-        outputBuffer.set_text(newText)                
+        newText = self.backend.getPreview()        
+        previewBuffer.set_text(newText)                
 
 
 
@@ -137,8 +111,56 @@ class MainWindow(Gtk.ApplicationWindow):
         self.about.set_program_name("Marking Up and Down")
         self.about.set_logo_icon_name("/home/autumn/Documents/Projects/personal_page/frontend/favicon.ico")  # The icon will need to be added to appropriate location
                                                  # E.g. /usr/share/icons/hicolor/scalable/apps/org.example.example.svg
-
         self.about.set_visible(True)
+
+
+    def insertNewPage(self, contents: str, label: str, position: int = -1):
+        editingWindow = Gtk.TextView()
+        previewWindow = Gtk.TextView()
+        leftScrollWrapper = Gtk.ScrolledWindow()
+        rightScrollWrapper = Gtk.ScrolledWindow()
+        leftPaneFrame = Gtk.Frame()
+        rightPaneFrame = Gtk.Frame()
+        labelBox = Gtk.Label()
+
+        core = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, homogeneous = True)
+        leftPane = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, homogeneous = True)
+        rightPane = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, homogeneous = True)
+
+        leftScrollWrapper.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        rightScrollWrapper.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        leftPaneFrame.set_margin_start(3)
+        leftPaneFrame.set_margin_end(3)
+        leftPaneFrame.set_margin_top(2)
+        leftPaneFrame.set_margin_bottom(2)
+        rightPaneFrame.set_margin_start(3)
+        rightPaneFrame.set_margin_end(3)
+        rightPaneFrame.set_margin_top(2)
+        rightPaneFrame.set_margin_bottom(2)        
+        core.append(leftPane)        
+        core.append(rightPane)        
+        leftPane.append(leftPaneFrame)
+        rightPane.append(rightPaneFrame)
+        leftPaneFrame.set_child(leftScrollWrapper)
+        leftScrollWrapper.set_child(editingWindow)
+        rightPaneFrame.set_child(rightScrollWrapper)
+        rightScrollWrapper.set_child(previewWindow)
+
+        textBuffer0 = Gtk.TextBuffer()
+        textBuffer1 = Gtk.TextBuffer()
+        pageBuffer = (textBuffer0, textBuffer1)
+        
+        if position == -1:
+            self.pages.append(pageBuffer)
+        else:
+            self.pages.insert(position, pageBuffer)
+
+        textBuffer0.set_text(contents, len(contents))
+        editingWindow.set_buffer(textBuffer0)
+        previewWindow.set_buffer(textBuffer1)
+        labelBox.set_label(label)
+
+        self.notebookBlock.insert_page(core, labelBox, position)
 
 
     def openFile(self, action, param):
@@ -152,10 +174,20 @@ class MainWindow(Gtk.ApplicationWindow):
         if response == Gtk.ResponseType.ACCEPT:
             file = dialog.get_file()
             fileName = file.get_path()
+            path = Path(fileName)
             #load file
-            #create a new notebook entry
-            #switch to that active entry
+            handle = open(fileName, "r")
+            data = handle.read()
+            handle.close()            
+            self.insertNewPage(data, path.stem, -1)
+            newPageNumber = len(self.pages)
+            self.changePage(newPageNumber, [])
+            self.updateOutput()
             print(fileName)
+
+
+    def createNewNotebookPage(self, contents, name):
+        self.notebookBlock.create
 
 
     def saveFile(self, action, param):

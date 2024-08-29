@@ -53,6 +53,11 @@ class MainWindow(Gtk.ApplicationWindow):
                 'function': self.saveFile
             },
             {
+                'title': "Export File",
+                'internal name': "fileExport",
+                'function': self.exportFile
+            },
+            {
                 'title': "Perferences",
                 'internal name': "launchPerferences",
                 'function': self.launchPerferencesWindow
@@ -164,18 +169,29 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def openFile(self, action, param):
+        print("open file")
         self.openFileDialog = Gtk.FileChooserNative.new(title = "Select a markdown document to load", parent = self, action = Gtk.FileChooserAction.OPEN)        
         self.openFileDialog.connect("response", self.open_response)
-        self.openFileDialog.show()        
-        print("file dialog")
+        self.openFileDialog.show()
+
+
+    def exportFile(self, action, param):
+        self.openFileDialog = Gtk.FileChooserNative.new(title = "Select a markdown document to load", parent = self, action = Gtk.FileChooserAction.SAVE)
+        self.openFileDialog.connect("response", self.exportFileResponse)
+        self.openFileDialog.show()
+
+
+    def saveFile(self, action, param):
+        self.openFileDialog = Gtk.FileChooserNative.new(title = "Select a name to save the current file to", parent = self, action = Gtk.FileChooserAction.SAVE)        
+        self.openFileDialog.connect("response", self.saveFileResponse)
+        self.openFileDialog.show()         
 
     
     def open_response(self, dialog, response):
         if response == Gtk.ResponseType.ACCEPT:
             file = dialog.get_file()
             fileName = file.get_path()
-            path = Path(fileName)
-            #load file
+            path = Path(fileName)            
             handle = open(fileName, "r")
             data = handle.read()
             handle.close()            
@@ -186,20 +202,28 @@ class MainWindow(Gtk.ApplicationWindow):
             print(fileName)
 
 
-    def createNewNotebookPage(self, contents, name):
-        self.notebookBlock.create
+    def saveFileResponse(self, dialog, response):
+        if response == Gtk.ResponseType.ACCEPT:
+            buffer = dialog.get_file()
+            filePath = buffer.get_path()
+            currentPage = self.notebookBlock.get_current_page()
+            (currentBuffer, currentPreview) = self.pages[currentPage]
+            data = currentBuffer.get_text(currentBuffer.get_start_iter(), currentBuffer.get_end_iter(), True)
+            handle = open(filePath, "w")
+            handle.write(data)
+            handle.close()
 
 
-    def saveFile(self, action, param):
-        #extract current editor contents
-        #save to a file
-        print("another file dialog")
-
-
-    def exportFile(self, action, param):
-        #extract current preview window contents
-        #save to a file
-        pass
+    def exportFileResponse(self, dialog, response):
+        if response == Gtk.ResponseType.ACCEPT:
+            buffer = dialog.get_file()
+            filePath = buffer.get_path()
+            currentPage = self.notebookBlock.get_current_page()
+            (currentBuffer, currentPreview) = self.pages[currentPage]
+            data = currentPreview.get_text(currentPreview.get_start_iter(), currentPreview.get_end_iter(), True)
+            handle = open(filePath, "w")
+            handle.write(data)
+            handle.close()
 
 
     def getPreferencesFromWindow(self, param):
@@ -218,16 +242,6 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def closeApp(self, action, param):
         sys.exit()
-
-
-    def print_something(self, action, param):
-        print("Something!")
-        print(self.variable)
-
-    
-    def another(self, action, param):
-        self.variable = True
-        print(self.variable)
 
 
     @staticmethod

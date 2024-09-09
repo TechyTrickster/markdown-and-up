@@ -19,12 +19,16 @@ sys.path = sorted(list(set(sys.path)))
 print(sys.path)
 
 from backend.previewGenerator import MarkdownPreview
+from backend.AppConfig import AppConfig
 
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, platforms, features, pretties,  *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.variable = False        
+        self.platformsPath = platforms
+        self.featuresPath = features
+        self.prettiesPath = pretties
+
         self.backend = MarkdownPreview(features, pretties, platforms)
         self.header = Gtk.HeaderBar()
         self.set_titlebar(self.header)        
@@ -233,7 +237,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def launchPerferencesWindow(self, action, param):
-        instance = OptionsWindow()
+        instance = OptionsWindow(self.platformsConfig, self.featuresConfig, self.prettiesConfig)
         instance.set_transient_for(self)
         instance.set_modal(True)
         instance.connect("close-request", self.getPreferencesFromWindow)
@@ -280,8 +284,9 @@ class PreviewWindow(Gtk.ApplicationWindow):
 
 
 class OptionsWindow(Gtk.ApplicationWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, platforms, features, pretties, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        print(platforms)
         self.box1 = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL)
         self.box2 = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
         self.platformBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
@@ -291,7 +296,9 @@ class OptionsWindow(Gtk.ApplicationWindow):
         self.prettySwitchBox.set_spacing(3)
 
 
-        radioNames = ["GitHub", "Discord", "CommonMark", "OpenStreetMap", "Reddit", "SourceForge", "Stack Exchange", "GitLab", "Discourse", "Swift", "Custom"]
+        radioNames = ["GitHub", "Discord", "CommonMark", "OpenStreetMap", 
+                      "Reddit", "SourceForge", "Stack Exchange", "GitLab", 
+                      "Discourse", "Swift", "Custom"]
         switchNames = ["Extras", "Admonition", "CodeHilite", "Meta-Data", "New Line to Break", "Sane Lists", "Table of Contents", "mark", "tasklist", "tilde", "progress bars"]
         prettyNames = ["tables", "lists", "fluid code blocks", "fluid images"]
         self.platformSelectors = self.generateRadioButtonList(radioNames, self.platformBox, self.optionSelected)
@@ -310,10 +317,19 @@ class OptionsWindow(Gtk.ApplicationWindow):
         print(event)
 
 
-    def switch_switched(self, switch, state):
-        print(switch)
-        
-        print(state)
+    def platform_state(self, switch, state):
+        selectedElement = list(filter(lambda x : x['radio element'] == switch, self.platformSelectors))[0]
+        selectedElement['state'] = state   
+
+
+    def pretty_state(self, switch, state):
+        selectedElement = list(filter(lambda x : x['switch element'] == switch, self.prettySwitches))[0]
+        selectedElement['state'] = state   
+
+
+    def feature_state(self, switch, state):
+        selectedElement = list(filter(lambda x : x['switch element'] == switch, self.featureSwitches))[0]
+        selectedElement['state'] = state        
 
 
     @staticmethod
@@ -348,8 +364,8 @@ class OptionsWindow(Gtk.ApplicationWindow):
         
         for element in names:
             newBox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL)
-            newSwitch = Gtk.Switch()            
-            newLable = Gtk.Label(label = element)            
+            newSwitch = Gtk.Switch()
+            newLable = Gtk.Label(label = element)
             newBox.set_spacing(5)
             newSwitch.set_active(False)
             newSwitch.connect("state-set", functionToTrigger)
@@ -370,9 +386,17 @@ class OptionsWindow(Gtk.ApplicationWindow):
     
 
     def getConfig(self) -> dict:        
+        featuresBuffer = list(map(lambda element : element['name'], list(filter(lambda x : x['state'], self.featureSwitches))))
+
+        prettyBuffer = list(map(lambda x : {
+            'function': '',
+            'options': '',
+            'active': False
+        }, self.prettySwitches))
+
         output = {
-            'feature switches': self.featureSwitches,
-            'pretty switches': self.prettySwitches,
+            'feature switches': featuresBuffer,
+            'pretty switches': prettyBuffer,
             'platform selectors': self.platformSelectors
         }
 

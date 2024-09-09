@@ -2,7 +2,7 @@
     {
         "platform name": "Github",
         "description": "an online git system to host your code",
-        "code path": "/local/path"
+        "code path": "/local/path"        
     },
     {
         "platform name": "Discord",
@@ -17,6 +17,41 @@
     {
         "platform name": "Stack Exchange",
         "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "OpenStreeMap",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Reddit",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "SourceForge",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "GitLab",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Discourse",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Swift",
+        "description": "the go to place for coding advice before they went into data sales",
+        "code path": "/local/path"
+    },
+    {
+        "platform name": "Twitter?",
+        "description": "The world's town square, unmoderated.  native support someday, soon???",
         "code path": "/local/path"
     }
 ]
